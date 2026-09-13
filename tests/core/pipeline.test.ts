@@ -22,9 +22,9 @@ const okBody = (ids: string[]) => ({
 
 beforeEach(() => {
   process.env.ZHIHU_ACCESS_SECRET = "test-secret";
-  process.env.DEFAULT_PROVIDER = "zhipu";
-  process.env.ZHIPU_API_KEY = "test-key";
-  process.env.ZHIPU_MODEL = "glm-5.2";
+  process.env.DEFAULT_PROVIDER = "claude";
+  process.env.ANTHROPIC_AUTH_TOKEN = "test-key";
+  process.env.ANTHROPIC_MODEL = "claude-sonnet-5";
 });
 afterEach(() => {
   vi.restoreAllMocks();

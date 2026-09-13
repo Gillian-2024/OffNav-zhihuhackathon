@@ -1,10 +1,10 @@
 // 直答额度只有 100/天（每租户每自然日，所有访客共享）。
-// 撞额度时降级到智谱，并让调用方能把这件事告诉用户，而不是静默换模型。
+// 撞额度时降级到 claude（Anthropic 协议，可指向兼容中转站），并让调用方能把这件事告诉用户，而不是静默换模型。
 import { generateText } from "ai";
 import { getProvider } from "./providers";
 import { resolveConfig } from "./config";
 
-const FALLBACK_PROVIDER = "zhipu";
+const FALLBACK_PROVIDER = "claude";
 
 // 判断是否为额度/限流类错误。知乎业务码 30001=频率或日限、30002=成功次数上限；
 // HTTP 429 与文案兜底覆盖 SDK 包装后的形态。

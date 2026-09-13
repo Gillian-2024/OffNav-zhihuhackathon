@@ -4,8 +4,8 @@ import { isQuotaError } from "@/lib/ai/fallback";
 beforeEach(() => {
   vi.resetModules();
   vi.stubEnv("ZHIHU_ACCESS_SECRET", "zhihu-key");
-  vi.stubEnv("ZHIPU_API_KEY", "zhipu-key");
-  vi.stubEnv("ZHIPU_MODEL", "glm-5.2");
+  vi.stubEnv("ANTHROPIC_AUTH_TOKEN", "claude-key");
+  vi.stubEnv("ANTHROPIC_MODEL", "claude-sonnet-5");
   vi.stubEnv("DEFAULT_PROVIDER", "zhihu");
 });
 afterEach(() => {
@@ -40,7 +40,7 @@ describe("generateWithFallback", () => {
     expect(r.text).toBe("ok");
   });
 
-  it("直答撞额度时降级到 zhipu 并标记 degraded", async () => {
+  it("直答撞额度时降级到 claude 并标记 degraded", async () => {
     let call = 0;
     vi.doMock("ai", () => ({
       generateText: async () => {
@@ -53,7 +53,7 @@ describe("generateWithFallback", () => {
     const r = await run({ headers: {}, system: "s", prompt: "p" });
     expect(call).toBe(2);
     expect(r.degraded).toBe(true);
-    expect(r.provider).toBe("zhipu");
+    expect(r.provider).toBe("claude");
     expect(r.text).toBe("backup-ok");
   });
 
@@ -70,7 +70,7 @@ describe("generateWithFallback", () => {
     expect(call).toBe(1);
   });
 
-  it("已经是 zhipu 时不再降级（避免自我重试）", async () => {
+  it("已经是 claude 时不再降级（避免自我重试）", async () => {
     let call = 0;
     vi.doMock("ai", () => ({
       generateText: async () => {
@@ -79,7 +79,7 @@ describe("generateWithFallback", () => {
       },
     }));
     const { generateWithFallback: run } = await import("@/lib/ai/fallback");
-    await expect(run({ headers: { "x-provider": "zhipu" }, system: "s", prompt: "p" })).rejects.toThrow();
+    await expect(run({ headers: { "x-provider": "claude" }, system: "s", prompt: "p" })).rejects.toThrow();
     expect(call).toBe(1);
   });
 });

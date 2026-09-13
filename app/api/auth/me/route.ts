@@ -12,6 +12,11 @@ export async function GET(req: NextRequest) {
   const s = await getStore().getSession(sid);
   if (!s) return Response.json({ user: null });
 
+  const u = await getStore().getUser(s.userId);
+  if (!u) return Response.json({ user: null });
+
   // 只回前端需要的展示字段，绝不回 oauthToken。
-  return Response.json({ user: { id: s.userId } });
+  return Response.json({
+    user: { id: s.userId, fullname: u.fullname, avatar: u.avatar, hashId: u.hashId },
+  });
 }

@@ -47,6 +47,7 @@ export interface OffNavStore {
   putCachedSearch(row: CachedSearch): Promise<void>;
 
   upsertUser(u: UserInput): Promise<UserRow>;
+  getUser(id: string): Promise<UserRow | null>;
 
   createSession(s: SessionRow): Promise<void>;
   getSession(id: string): Promise<SessionRow | null>;

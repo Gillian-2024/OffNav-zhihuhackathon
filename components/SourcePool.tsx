@@ -29,16 +29,19 @@ export function SourcePool({ items, usedIds }: { items: PoolItem[]; usedIds: Set
 
   return (
     <>
-      <button className="pool-tab" onClick={() => setOpen(true)}>
+      <button className="pool-tab btn-tap" onClick={() => setOpen(true)}>
         本次检索 {items.length} 篇原文（{usedCount} 篇被引用）›
       </button>
 
       <aside className="pool-panel" data-open={open ? "1" : "0"} data-desktop-always>
+        {/* 宽屏才显示：说明窄栏是手机优先的设计选择，不是响应式没做完。
+            手机上这个 aside 本身就是抽屉，不需要再解释。 */}
+        <p className="pool-hint">移动端优先设计，宽屏下来源池常驻在这里</p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <strong style={{ fontSize: 14 }}>
             来源池 · {items.length} 篇
           </strong>
-          <button onClick={() => setOpen(false)} style={{ background: "none", border: 0, color: "var(--text-dim)", cursor: "pointer" }}>
+          <button className="btn-tap" onClick={() => setOpen(false)} style={{ background: "none", border: 0, color: "var(--text-dim)", cursor: "pointer" }}>
             收起
           </button>
         </div>

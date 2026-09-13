@@ -28,6 +28,11 @@ export function createMemoryStore(): OffNavStore {
       users.set(u.zhihuUid, row);
       return row;
     },
+    // users 以 zhihuUid 为 key，按 id 查需要遍历；用户数量小，进程内实现无需索引。
+    async getUser(id) {
+      for (const row of users.values()) if (row.id === id) return row;
+      return null;
+    },
 
     async createSession(s) {
       sessions.set(s.id, s);

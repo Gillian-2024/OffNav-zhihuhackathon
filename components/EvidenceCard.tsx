@@ -24,12 +24,12 @@ export function EvidenceCardView({ card }: { card: EvidenceCard }) {
 
   return (
     <div className="ev">
-      <button className="ev-head" onClick={() => setOpen(!open)} aria-expanded={open}>
+      <button className="ev-head btn-tap" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span aria-hidden="true">{open ? "▾" : "▸"}</span>
         <span className="ev-title">{cleanTitle(card.title)}</span>
-        <span className="ev-meta">@{card.authorName}</span>
+        <span className="ev-meta">@{card.authorName || "知乎用户"}</span>
         <AuthorityBadge level={card.authorityLevel} />
-        <span className="ev-meta">{card.voteUpCount} 赞</span>
+        <span className="ev-meta ev-votes">{card.voteUpCount} 赞</span>
       </button>
 
       {open && (

@@ -133,6 +133,14 @@ export function createPostgrestStore(): OffNavStore {
       // 响应没带回行（未确认网关是否支持 return=representation）时，退回本地拼装值。
       return { id, createdAt, ...u };
     },
+    async getUser(id) {
+      const r = pickRow(await rdb(`users?id=eq.${encodeURIComponent(id)}&limit=1`));
+      if (!r) return null;
+      return {
+        id: r.id, zhihuUid: r.zhihu_uid, hashId: r.hash_id,
+        fullname: r.fullname, avatar: r.avatar, createdAt: Number(r.created_at),
+      };
+    },
 
     async createSession(s) {
       await rdb("sessions", {

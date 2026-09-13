@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { streamSSE } from "@/lib/client/sse";
+import { withBase } from "@/lib/client/basePath";
 import { SourcePool, type PoolItem } from "@/components/SourcePool";
 import { NavResult } from "@/components/NavResult";
 import { CompareResult } from "@/components/CompareResult";
@@ -43,7 +44,7 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/api/auth/me")
+    fetch(withBase("/api/auth/me"))
       .then((r) => r.json())
       .then((d) => setUser(d.user))
       .catch(() => {});
@@ -52,7 +53,7 @@ export default function Home() {
   async function onUpload(file: File) {
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const res = await fetch(withBase("/api/upload"), { method: "POST", body: fd });
     const d = await res.json();
     if (d.error) setError(d.error);
     else setInput(d.text);
@@ -69,7 +70,7 @@ export default function Home() {
 
     const body = mode === "match" ? { profileText: input, target } : { input };
 
-    await streamSSE(`/api/${mode}`, body, {
+    await streamSSE(withBase(`/api/${mode}`), body, {
       step: (e) => setSteps((s) => [...s, e.message]),
       pool: (e) => setPool(e.items),
       notice: (e) => setNotice(e.message),
@@ -94,14 +95,27 @@ export default function Home() {
           </p>
         </div>
         {user ? (
-          <button
-            onClick={() => fetch("/api/auth/logout", { method: "POST" }).then(() => setUser(null))}
-            style={{ background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "4px 10px", color: "var(--text-dim)", cursor: "pointer" }}
-          >
-            退出
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <a href={withBase("/me")} title={user.fullname || "个人主页"}>
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.fullname || "头像"}
+                  style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", display: "block" }}
+                />
+              ) : (
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--border)" }} />
+              )}
+            </a>
+            <button
+              onClick={() => fetch(withBase("/api/auth/logout"), { method: "POST" }).then(() => setUser(null))}
+              style={{ background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "4px 10px", color: "var(--text-dim)", cursor: "pointer" }}
+            >
+              退出
+            </button>
+          </div>
         ) : (
-          <a href="/api/auth/zhihu/start" style={{ fontSize: 13, color: "var(--link)", whiteSpace: "nowrap", flexShrink: 0 }}>
+          <a href={withBase("/api/auth/zhihu/start")} style={{ fontSize: 13, color: "var(--link)", whiteSpace: "nowrap", flexShrink: 0 }}>
             知乎登录
           </a>
         )}
@@ -164,7 +178,7 @@ export default function Home() {
       {!busy && !result && !error && steps.length === 0 && (
         <div className="card" style={{ marginTop: 18 }}>
           <div className="kanshan-row">
-            <img src="/kanshan/hello.gif" alt="" className="kanshan kanshan-lg" />
+            <img src={withBase("/kanshan/hello.gif")} alt="" className="kanshan kanshan-lg" />
             <p style={{ margin: 0, fontSize: 14, color: "var(--text-dim)" }}>
               输入后，OffNav 会做四件事：
             </p>
@@ -184,7 +198,7 @@ export default function Home() {
       {steps.length > 0 && !result && (
         <div className="card" style={{ marginTop: 14 }}>
           <div className="kanshan-row">
-            <img src="/kanshan/working.gif" alt="" className="kanshan" />
+            <img src={withBase("/kanshan/working.gif")} alt="" className="kanshan" />
             <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.9 }}>
               {steps.map((s, i) => (
                 <li key={i}>{i === steps.length - 1 ? "▸ " : "✓ "}{s}</li>
@@ -203,7 +217,7 @@ export default function Home() {
       {error && (
         <div className="card" style={{ marginTop: 14, borderColor: "#f1403c" }}>
           <div className="kanshan-row">
-            <img src="/kanshan/sleepy.gif" alt="" className="kanshan" />
+            <img src={withBase("/kanshan/sleepy.gif")} alt="" className="kanshan" />
             <span style={{ color: "#f1403c", fontSize: 14 }}>{error}</span>
           </div>
         </div>

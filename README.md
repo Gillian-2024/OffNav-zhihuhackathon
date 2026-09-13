@@ -65,7 +65,7 @@ Next 15 App Router · React 19 · TypeScript · zod · Vercel AI SDK · 腾讯 C
 | 知识库 RAG | 检索返回整篇摘要，丢失单条来源归属 | 与证据链冲突，未采用 |
 | 发布写 API | `creator` 四个接口全是 GET，只认本人身份 | 「一键发布回知乎」是伪需求，产出为可复制文本 + 深链 |
 
-搜索结果按 `query_hash` 缓存 24 小时。生成默认走知乎直答（`zhida-fast-1p5`），其 100 次/天额度为全租户共享，撞额度自动降级到智谱 glm-5.2 并在界面告知用户。
+搜索结果按 `query_hash` 缓存 24 小时。生成默认走知乎直答（`zhida-fast-1p5`），其 100 次/天额度为全租户共享，撞额度自动降级到 Anthropic 协议兼容端点并在界面告知用户。
 
 ## 安全
 
@@ -91,12 +91,12 @@ Next 15 App Router · React 19 · TypeScript · zod · Vercel AI SDK · 腾讯 C
 ```
 DEFAULT_PROVIDER=zhihu
 ZHIHU_ZHIDA_MODEL=zhida-fast-1p5
-ZHIPU_MODEL=glm-5.2
-ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+ANTHROPIC_MODEL=claude-sonnet-5
+ANTHROPIC_BASE_URL=<Anthropic 或兼容中转站>
 CLOUDBASE_API_BASE=https://offnav-2026-d6gvnsynj3c561411.api.intl.tcloudbasegateway.com
 ZHIHU_ACCESS_SECRET=<机密>
-ZHIPU_API_KEY=<机密>
+ANTHROPIC_AUTH_TOKEN=<机密>
 CLOUDBASE_SERVER_API_KEY=<机密>
 ```
 
-OAuth 的 `ZHIHU_OAUTH_APP_ID` / `APP_KEY` 由赛事页面在提交项目时生成；`ZHIHU_OAUTH_REDIRECT_URI` 须填 `https://<部署域名>/api/auth/zhihu/callback`，且与赛事页面登记值完全一致（协议、域名、端口、路径、尾斜杠）。
+OAuth 的 `ZHIHU_OAUTH_APP_ID` / `APP_KEY` 由赛事页面在提交项目时生成；`ZHIHU_OAUTH_REDIRECT_URI` 须填 `https://<部署域名>/auth/callback`，且与赛事页面登记值完全一致（协议、域名、端口、路径、尾斜杠）。

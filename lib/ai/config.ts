@@ -1,5 +1,5 @@
 // 模型配置解析。移植自 server/src/utils/config.js，适配 Next（headers 而非 Express req）。
-// Next 由 .env.local 注入 env；此处在 process.env 上读取，默认 provider 走知乎直答（额度耗尽时降级到智谱）。
+// Next 由 .env.local 注入 env；此处在 process.env 上读取，默认 provider 走知乎直答（额度耗尽时降级到 claude 兼容中转）。
 // ⚠️ BYOK 全有或全无：仅当客户端自带 x-api-key 时才信任 x-base-url 自定义，
 //    否则一律走服务端 profile 的 baseUrl——防止攻击者只传 x-base-url,
 //    把服务端自己的 API Key 发送到其控制的域名（密钥走私）。
@@ -12,9 +12,9 @@ export type ResolveInput = {
 
 const ENV_PROFILES: Record<string, { apiKey: string; baseUrl: string; model: string }> = {
   claude: {
-    apiKey: process.env.ANTHROPIC_API_KEY || "",
+    apiKey: process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN || "",
     baseUrl: process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com",
-    model: process.env.ANTHROPIC_MODEL || "",
+    model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY || "",
@@ -25,11 +25,6 @@ const ENV_PROFILES: Record<string, { apiKey: string; baseUrl: string; model: str
     apiKey: process.env.DEEPSEEK_API_KEY || "",
     baseUrl: "https://api.deepseek.com",
     model: "",
-  },
-  zhipu: {
-    apiKey: process.env.ZHIPU_API_KEY || "",
-    baseUrl: process.env.ZHIPU_BASE_URL || "https://open.bigmodel.cn/api/paas/v4",
-    model: process.env.ZHIPU_MODEL || "glm-5.2",
   },
   zhihu: {
     apiKey: process.env.ZHIHU_ACCESS_SECRET || "",

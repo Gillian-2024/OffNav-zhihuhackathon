@@ -73,6 +73,13 @@ describe("用户 upsert", () => {
     expect(b.id).toBe(a.id);
     expect(b.fullname).toBe("n2");
   });
+
+  it("getUser 按 id 查回同一行；不存在返回 null", async () => {
+    const u = await store.upsertUser({ zhihuUid: "2", hashId: "h", fullname: "n", avatar: "a" });
+    const got = await store.getUser(u.id);
+    expect(got).toEqual(u);
+    expect(await store.getUser("ghost")).toBeNull();
+  });
 });
 
 describe("分析结果", () => {

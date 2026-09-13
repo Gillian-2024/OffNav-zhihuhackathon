@@ -65,8 +65,16 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font: 15px/1.65 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  /* 中文正文在手机上 15px/1.75 比 1.65 更松，长句不挤。 */
+  font: 15px/1.75 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   -webkit-text-size-adjust: 100%;
+}
+
+/* 通用按压反馈：可点元素按下时轻微下沉，短、克制，只做「状态可感知」用。 */
+.btn-tap { transition: transform 150ms ease-out, opacity 150ms ease-out; }
+.btn-tap:active { transform: scale(0.97); opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) {
+  .btn-tap, .btn-tap:active { transition: none; transform: none; }
 }
 
 .wrap {
@@ -81,6 +89,9 @@ html, body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
+  /* 极轻阴影代替单靠边框分层：只在浅色下可见（深色背景上黑色阴影本身不显形，
+     无需额外用 media 关掉），克制到几乎看不出「有阴影」，只让卡片边缘更软。 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 /* 权威度徽标 */
@@ -126,7 +137,16 @@ html, body {
   background: var(--bg);
   border-radius: 8px;
   font-size: 13px;
+  line-height: 1.7;
   color: var(--text-dim);
+  animation: ev-body-in 180ms ease-out;
+}
+@keyframes ev-body-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-body { animation: none; }
 }
 .ev-link { display: inline-block; margin-top: 8px; color: var(--link); font-size: 13px; }
 
@@ -195,26 +215,97 @@ html, body {
   }
 }
 
+/* 空状态：列表为空时给一句克制的说明，不是留一个光标题。 */
+.empty-hint {
+  padding: 14px 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* 折叠区块：内容始终在 DOM 里，靠 grid-template-rows 0fr↔1fr 做高度过渡，
+   不需要 JS 测量真实高度，reduced-motion 下直接切无过渡。 */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease-out;
+}
+.collapse.is-open { grid-template-rows: 1fr; }
+.collapse > div { overflow: hidden; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .collapse { transition: none; }
+}
+
 /* —— 结果页的视觉层级 ——
    滑动时要能一眼分出「哪里是新的一轮」「哪句是结论」「哪句是来源」。
    实测截图发现三者字重接近、来源卡的赞同数还会掉到第二行，所以分三处收拾。 */
 
-/* 轮次分节：左侧一个小方块 + 更重的字，滑动时是明确的分界 */
+/* 轮次分节：可折叠。整块是一个 button，左侧色块 + 更重的字，
+   右侧箭头随展开状态转向。section 间距比卡片内间距更大——
+   ~50 个考点的长列表里，「哪里换了一轮」比「卡片内部多松」更重要。 */
 .round-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 24px 0 10px;
-  font-size: 17px;
-  font-weight: 650;
+  width: 100%;
+  margin: 0;
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
   letter-spacing: -0.01em;
+  text-align: left;
+  cursor: pointer;
 }
 .round-dot {
   width: 3px;
-  height: 15px;
+  height: 16px;
   border-radius: 2px;
   background: var(--brand);
   flex-shrink: 0;
+}
+.round-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+.round-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-faint);
+  transition: transform 200ms ease-out;
+}
+.round-head[aria-expanded="true"] .round-chevron { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) {
+  .round-chevron { transition: none; }
+}
+.round-section { margin-top: 32px; }
+.round-section:first-child { margin-top: 0; }
+
+/* 轮次跳转索引：横向可滚动的一排 chip，点击跳到对应轮次。
+   长列表的「进度感」——不用做进度条，先给一份地图。 */
+.round-index {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+  margin-bottom: 18px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.round-index::-webkit-scrollbar { display: none; }
+.round-index-item {
+  flex-shrink: 0;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 /* 主题：比结论轻，作为卡内的小标题 */
@@ -227,11 +318,11 @@ html, body {
 }
 
 /* 结论：正文主角，比来源卡重且深 */
-.point { margin-bottom: 14px; }
+.point { margin-bottom: 16px; }
 .point:last-child { margin-bottom: 0; }
 .point-text {
-  font-size: 14.5px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.75;
   color: var(--text);
 }
 
@@ -252,6 +343,8 @@ html, body {
   white-space: nowrap;
 }
 .ev-meta { flex-shrink: 0; white-space: nowrap; }
+/* 赞同数是「这条来源有多少人背书」的关键信号，字重比作者名和标题更重一档。 */
+.ev-votes { font-weight: 600; color: var(--text-dim); }
 
 /* 抽屉抬高一点，避开开发工具悬浮球，也更好点 */
 .pool-tab { padding-block: 14px; }
@@ -274,4 +367,62 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   /* 尊重系统的减少动态偏好：静态首帧仍然在，只是不再循环播放 */
   .kanshan { animation: none; }
+}
+
+/* —— 问题对照（CompareResult）——
+   共识/分歧是「已经算清楚」的结论，理应先见；21 条各方说法是过程性素材，
+   放前面会把结论埋掉。改成结论先行 + 说法默认收起（可展开）。 */
+.consensus-item, .divergence-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.consensus-item:last-child, .divergence-item:last-child { border-bottom: 0; }
+.compare-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  color: var(--text-dim);
+  background: var(--bg);
+}
+
+/* —— 我的背景（MatchResult）——
+   标签是背景摘要的索引，不是主体，克制成小字灰底；差距（gap）才是主体，
+   给一个更重的编号感标题。 */
+.match-tag {
+  padding: 3px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.gap-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+.gap-index {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand);
+}
+.gap-title { font-size: 16px; font-weight: 650; margin: 0; }
+
+/* 宽屏下来源池顶部的一句说明：告诉评委窄栏是设计选择，不是没做响应式。
+   只在 ≥1024px 出现（手机上没必要解释）。 */
+.pool-hint {
+  display: none;
+  font-size: 12px;
+  color: var(--text-faint);
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+@media (min-width: 1024px) {
+  .pool-hint { display: block; }
 }

@@ -50,7 +50,7 @@ export function parseUidLossless(rawJson: string): string {
 }
 
 export async function fetchZhihuUser(accessToken: string): Promise<{
-  uid: string; hashId: string; fullname: string; avatar: string;
+  uid: string; hashId: string; fullname: string; avatar: string; headline: string;
 }> {
   const res = await fetch(USERINFO, {
     headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
@@ -70,6 +70,7 @@ export async function fetchZhihuUser(accessToken: string): Promise<{
     hashId: String(parsed.hash_id ?? ""),
     fullname: String(parsed.fullname ?? ""),
     avatar: String(parsed.avatar_path ?? ""),
+    headline: String(parsed.headline ?? ""),
   };
 }
 
