@@ -1,5 +1,10 @@
 # OffNav
 
+> **移动端优先**：OffNav 是按手机屏幕设计的——目标用户在手机上刷知乎，分享出去的链接也在手机上打开。
+> 用电脑访问同样可用，宽屏下右侧会展开常驻的来源池面板。**建议用手机打开，或把浏览器窗口收窄到手机宽度体验。**
+
+**线上体验**：https://offnav-2026-d6gvnsynj3c561411-1485365421.ap-singapore.app.tcloudbase.com/offnav
+
 把知乎的经验长文，按知乎自己的权威度信号重排，织成一条带证据链的求职路径。
 
 知乎黑客松 2026 校园新锐季 · 知识炼金场赛道参赛作品。
@@ -48,7 +53,7 @@ npm run build
 
 ## 技术栈
 
-Next 16 App Router · React 19 · TypeScript · zod · Vercel AI SDK · 腾讯 CloudBase（PostgreSQL，ap-singapore）
+Next 15 App Router · React 19 · TypeScript · zod · Vercel AI SDK · 腾讯 CloudBase（PostgreSQL，ap-singapore）
 
 ## 知乎开放平台用法与实测约束
 
@@ -71,7 +76,13 @@ Next 16 App Router · React 19 · TypeScript · zod · Vercel AI SDK · 腾讯 C
 
 ## 部署
 
-运行在腾讯 CloudBase 云托管（容器型），环境 `offnav-2026-d6gvnsynj3c561411`，地域 `ap-singapore`。
+运行在腾讯 CloudBase **云函数（HTTP Function）**，环境 `offnav-2026-d6gvnsynj3c561411`，地域 `ap-singapore`。
+
+访问地址：https://offnav-2026-d6gvnsynj3c561411-1485365421.ap-singapore.app.tcloudbase.com/offnav
+
+**为什么是云函数而不是云托管**：当前环境是体验版套餐，不含云托管资源（`CreateCloudRunServer` 报「云托管资源未开通」）；静态网站托管的 Git 部署走的是 `static-hosting`，没有 Node 进程，而本项目 8 个 API 路由全是服务端渲染。`deploy/Dockerfile` 保留了容器路径，套餐升级后可直接切回，代码无需改动。
+
+**Node 18 兼容层**：云函数运行时最高 Node 18.15，而 Next 16 要求 >= 20.9、Next 14 要求 >= 18.17。因此固定 Next 15.5.25，并通过 `node --require deploy/node18-polyfill.cjs` 补两个缺失能力：`AsyncLocalStorage.snapshot`（Node 18.16 才有，Next 服务端渲染路径依赖）与 `File` 全局（Node 20 才有，解析 multipart 表单时引用）。缺前者会让所有 API 路由 500 而静态页面正常，缺后者只影响文件上传。
 
 数据库五张表（`users` / `sessions` / `oauth_states` / `zhihu_search_cache` / `nav_results`）已建好，`lib/db/schema.sql` 是 schema 参考与灾备重建用的存档，不是待执行的建表步骤。
 
