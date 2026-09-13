@@ -99,4 +99,10 @@ ANTHROPIC_AUTH_TOKEN=<机密>
 CLOUDBASE_SERVER_API_KEY=<机密>
 ```
 
-OAuth 的 `ZHIHU_OAUTH_APP_ID` / `APP_KEY` 由赛事页面在提交项目时生成；`ZHIHU_OAUTH_REDIRECT_URI` 须填 `https://<部署域名>/auth/callback`，且与赛事页面登记值完全一致（协议、域名、端口、路径、尾斜杠）。
+OAuth 的 `ZHIHU_OAUTH_APP_ID` / `APP_KEY` 由赛事页面在提交项目时生成；`ZHIHU_OAUTH_REDIRECT_URI` 当前值为：
+
+```
+https://offnav-2026-d6gvnsynj3c561411-1485365421.ap-singapore.app.tcloudbase.com/offnav/auth/callback
+```
+
+必须与赛事页面登记值逐字符一致（协议、域名含 `-1485365421` 段、路径、无尾斜杠）。
