@@ -10,10 +10,10 @@ import { MatchResult } from "@/components/MatchResult";
 
 type Mode = "nav" | "compare" | "match";
 
-const MODES: { key: Mode; label: string; placeholder: string }[] = [
-  { key: "nav", label: "岗位导航", placeholder: "例如：字节跳动 产品经理 校招" },
-  { key: "compare", label: "问题对照", placeholder: "例如：产品经理面试怎么答产品分析题" },
-  { key: "match", label: "我的背景", placeholder: "粘贴背景，或上传简历文件" },
+const MODES: { key: Mode; label: string; placeholder: string; hint: string }[] = [
+  { key: "nav", label: "岗位导航", placeholder: "例如：字节跳动 产品经理 校招", hint: "填入公司和岗位，开始导航" },
+  { key: "compare", label: "问题对照", placeholder: "例如：产品经理面试怎么答产品分析题", hint: "填入一个面试问题，看各方怎么答" },
+  { key: "match", label: "我的背景", placeholder: "粘贴背景，或上传简历文件", hint: "上传简历或粘贴背景，开始比对" },
 ];
 
 // 收集结果里所有被引用的来源 url，用于在来源池标「已引用」。
@@ -109,71 +109,68 @@ export default function Home() {
             </a>
             <button
               onClick={() => fetch(withBase("/api/auth/logout"), { method: "POST" }).then(() => setUser(null))}
-              style={{ background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "4px 10px", color: "var(--text-dim)", cursor: "pointer" }}
+              className="btn-ghost btn-tap"
             >
               退出
             </button>
           </div>
         ) : (
-          <a href={withBase("/api/auth/zhihu/start")} style={{ fontSize: 13, color: "var(--link)", whiteSpace: "nowrap", flexShrink: 0 }}>
+          <a href={withBase("/api/auth/zhihu/start")} className="login-link btn-tap">
             知乎登录
           </a>
         )}
       </header>
 
-      <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+      <div className="segmented" role="group" aria-label="选择分析模式">
         {MODES.map((m) => (
           <button
             key={m.key}
+            className="btn-tap"
+            aria-pressed={mode === m.key}
             onClick={() => { setMode(m.key); setResult(null); setPool([]); }}
-            style={{
-              flex: 1,
-              padding: "8px 4px",
-              fontSize: 13,
-              borderRadius: 8,
-              cursor: "pointer",
-              border: `1px solid ${mode === m.key ? "var(--brand)" : "var(--border)"}`,
-              background: mode === m.key ? "var(--brand)" : "var(--surface)",
-              color: mode === m.key ? "#fff" : "var(--text)",
-            }}
           >
             {m.label}
           </button>
         ))}
       </div>
 
-      {mode === "match" && (
-        <>
-          <input
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            placeholder="目标岗位（例如：字节 产品经理）"
-            style={{ width: "100%", padding: 10, marginBottom: 8, borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 15 }}
-          />
-          <input
-            type="file"
-            accept=".pdf,.docx,.txt,.html"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(f); }}
-            style={{ marginBottom: 8, fontSize: 13 }}
-          />
-        </>
-      )}
+      <div className="form-group">
+        {mode === "match" && (
+          <>
+            <input
+              className="field"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              placeholder="目标岗位（例如：字节 产品经理）"
+            />
+            <label className="file-pick">
+              <input
+                type="file"
+                accept=".pdf,.docx,.txt,.html"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(f); }}
+              />
+              上传简历（PDF / Word / txt），或直接粘贴到下方
+            </label>
+          </>
+        )}
 
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder={active.placeholder}
-        rows={mode === "match" ? 6 : 2}
-        style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 15, resize: "none" }}
-      />
+        <textarea
+          className="field"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={active.placeholder}
+          rows={mode === "match" ? 6 : 2}
+        />
+      </div>
 
-      <button
-        onClick={run}
-        disabled={busy || !input.trim()}
-        style={{ width: "100%", marginTop: 8, padding: 12, borderRadius: 8, border: 0, background: busy ? "var(--border)" : "var(--brand)", color: busy ? "var(--text-dim)" : "#fff", fontSize: 15, cursor: busy ? "default" : "pointer" }}
-      >
-        {busy ? "正在导航…" : "开始导航"}
-      </button>
+      <div className="form-cta">
+        <button className="cta btn-tap" onClick={run} disabled={busy || !input.trim()}>
+          {busy ? "正在导航…" : "开始导航"}
+        </button>
+        {!busy && !input.trim() && (
+          <p className="cta-hint">{active.hint}</p>
+        )}
+      </div>
 
       {!busy && !result && !error && steps.length === 0 && (
         <div className="card" style={{ marginTop: 18 }}>

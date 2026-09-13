@@ -426,3 +426,109 @@ html, body {
 @media (min-width: 1024px) {
   .pool-hint { display: block; }
 }
+
+/* ── 表单控件：统一圆角/字号/触达尺寸 ──
+   菲茨定律：所有可点目标 ≥44px 高。之前模式按钮 33px、退出按钮 26px，
+   在手机上是真实的误触来源，不是纸面指标。 */
+.field {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  min-height: 44px;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+}
+.field:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+textarea.field { resize: none; line-height: 1.6; }
+
+/* 亲密性：一组输入是一个整体，组内 8px、组与组之间 18px */
+.form-group { display: grid; gap: 8px; }
+.form-group + .form-cta { margin-top: 14px; }
+
+/* 视觉层级：主 CTA 是页面唯一最重的元素——更大字号 + 加粗 + 52px 高 */
+.cta {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cta:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+.cta-hint { margin-top: 6px; font-size: 12px; color: var(--text-dim); text-align: center; }
+
+/* 模式切换：分段控件形态，一致的 44px 触达 */
+.segmented { display: flex; gap: 6px; margin-bottom: 18px; }
+.segmented button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 4px;
+  font-size: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.segmented button[aria-pressed="true"] {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 次要按钮（退出）：低视觉权重但仍满足触达 */
+.btn-ghost {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* 文件选择：原生 input 样式不可控，包成 label 与 .field 对齐 */
+.file-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.file-pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.file-pick:focus-within { border-color: var(--brand); border-style: solid; }
+
+/* 未登录态入口：链接语义，但保持 44px 触达 */
+.login-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--brand);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--link);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
