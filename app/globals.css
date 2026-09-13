@@ -1,22 +1,30 @@
 /* OffNav 设计令牌。手机优先，1024px 为增强断点。
    权威度是唯一强调色系——L4 最深，L1 最浅。 */
 :root {
-  --bg: #fbfbfa;
+  /* 中性色取自知乎官方 ADS token（见 hello-world 示例 CSS 的注释命名）：
+     Frame/99A #ffffff 页面白、Frame/10A #f6f6f6 常用灰、主文字 #121212、次文字 #646464。 */
+  --bg: #f6f6f6;
   --surface: #ffffff;
-  --border: #e6e4e0;
-  --text: #1c1b19;
-  --text-dim: #6b6862;
-  --text-faint: #9a968f;
+  --border: #ebebeb;
+  --text: #121212;
+  --text-dim: #646464;
+  --text-faint: #8590a6;
 
-  /* 权威度阶梯 */
-  /* 权威度阶梯：L4 最深 → L1 最浅，四级明度单调递进（相邻 >=1.66x）。
-     全部按「白字」校准过 WCAG AA：最低一级 L1 也有 4.85:1。
-     11px 小字上原配色最低只有 1.70:1，L4 徽标几乎不可读——而 L4 恰是产品最想让人看到的信号。 */
-  --auth-4: #0c2e21;
-  --auth-3: #154a34;
-  --auth-2: #1f6547;
-  --auth-1: #28805c;
-  --auth-0: #6b7280;
+  /* 品牌蓝 ADS Blue/MapBrand。#1772f6 配白字是 4.40:1——正文链接不达 AA，
+     所以链接用压深一档的 #1568e6（白底 5.05、灰底 4.68），品牌蓝本色留给
+     大号主按钮（≥18px 走 3:1 门槛，4.40 达标）。 */
+  --brand: #1772f6;
+  --link: #1568e6;
+
+  /* 权威度阶梯：知乎蓝的明度序列，L4 最深 → L1 最浅，四级单调递进。
+     全部按白字校准 WCAG AA（12.87 / 9.26 / 6.38 / 5.13），11px 小字也可读。
+     不用绿色——绿色在 ADS 里是 Green/通过绿 MapPass，是状态色，
+     拿来表示权威度等级等于挪用它的语义。 */
+  --auth-4: #0a2f6b;
+  --auth-3: #0f458f;
+  --auth-2: #135cbd;
+  --auth-1: #1668e0;
+  --auth-0: #5b6472;
   --auth-fg: #ffffff;
 
   --radius: 10px;
@@ -31,15 +39,19 @@
     --border: #33363b;
     --text: #ececea;
     --text-dim: #a8a5a0;
-    --text-faint: #77746f;
+    --text-faint: #8590a6;
 
-    /* 深色主题反转：背景转亮、文字转深，同样四级单调 + 全部 >=4.53:1。 */
-    --auth-4: #8ee4b8;
-    --auth-3: #6bcb9b;
-    --auth-2: #4fb183;
-    --auth-1: #3d9670;
-    --auth-0: #9aa0a6;
-    --auth-fg: #10231b;
+    /* 深色下品牌蓝需提亮才够对比：#5b9dff on #17181a = 6.52。 */
+    --brand: #5b9dff;
+    --link: #5b9dff;
+
+    /* 阶梯反转：底色转亮、文字转深，同样四级单调 + 全部 ≥5.24:1。 */
+    --auth-4: #a9cdff;
+    --auth-3: #89b8fb;
+    --auth-2: #69a2f7;
+    --auth-1: #4a8cf3;
+    --auth-0: #9aa4b2;
+    --auth-fg: #0a1a33;
   }
 }
 
@@ -113,7 +125,7 @@ html, body {
   font-size: 13px;
   color: var(--text-dim);
 }
-.ev-link { display: inline-block; margin-top: 8px; color: var(--auth-3); font-size: 13px; }
+.ev-link { display: inline-block; margin-top: 8px; color: var(--link); font-size: 13px; }
 
 /* 来源池：手机底部抽屉 */
 .pool-tab {
@@ -149,7 +161,7 @@ html, body {
   border-bottom: 1px solid var(--border);
   font-size: 13px;
 }
-.pool-used { color: var(--auth-3); font-size: 11px; }
+.pool-used { color: var(--link); font-size: 11px; }
 
 /* 宽屏增强：抽屉变右侧常驻栏 */
 @media (min-width: 1024px) {

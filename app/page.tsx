@@ -101,7 +101,7 @@ export default function Home() {
             退出
           </button>
         ) : (
-          <a href="/api/auth/zhihu/start" style={{ fontSize: 13, color: "var(--auth-3)" }}>
+          <a href="/api/auth/zhihu/start" style={{ fontSize: 13, color: "var(--link)", whiteSpace: "nowrap", flexShrink: 0 }}>
             知乎登录
           </a>
         )}
@@ -114,12 +114,12 @@ export default function Home() {
             onClick={() => { setMode(m.key); setResult(null); setPool([]); }}
             style={{
               flex: 1,
-              padding: "7px 4px",
+              padding: "8px 4px",
               fontSize: 13,
-              borderRadius: 6,
+              borderRadius: 8,
               cursor: "pointer",
-              border: `1px solid ${mode === m.key ? "var(--auth-3)" : "var(--border)"}`,
-              background: mode === m.key ? "var(--auth-3)" : "var(--surface)",
+              border: `1px solid ${mode === m.key ? "var(--brand)" : "var(--border)"}`,
+              background: mode === m.key ? "var(--brand)" : "var(--surface)",
               color: mode === m.key ? "#fff" : "var(--text)",
             }}
           >
@@ -150,16 +150,33 @@ export default function Home() {
         onChange={(e) => setInput(e.target.value)}
         placeholder={active.placeholder}
         rows={mode === "match" ? 6 : 2}
-        style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 15, resize: "vertical" }}
+        style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 15, resize: "none" }}
       />
 
       <button
         onClick={run}
         disabled={busy || !input.trim()}
-        style={{ width: "100%", marginTop: 8, padding: 12, borderRadius: 8, border: 0, background: busy ? "var(--auth-1)" : "var(--auth-4)", color: "#fff", fontSize: 15, cursor: busy ? "default" : "pointer" }}
+        style={{ width: "100%", marginTop: 8, padding: 12, borderRadius: 8, border: 0, background: busy ? "var(--border)" : "var(--brand)", color: busy ? "var(--text-dim)" : "#fff", fontSize: 15, cursor: busy ? "default" : "pointer" }}
       >
         {busy ? "正在导航…" : "开始导航"}
       </button>
+
+      {!busy && !result && !error && steps.length === 0 && (
+        <div className="card" style={{ marginTop: 18 }}>
+          <p style={{ margin: "0 0 10px", fontSize: 14, color: "var(--text-dim)" }}>
+            输入后，OffNav 会做四件事：
+          </p>
+          <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: "var(--text-dim)", lineHeight: 1.9 }}>
+            <li>用多组关键词检索知乎，合并去重成一个内容池</li>
+            <li>按知乎自己的权威度（<span className="auth auth-4">L4</span> 最高）和赞同数重排</li>
+            <li>结构化成一张分轮次、分主题的地图</li>
+            <li>每条结论挂上来源卡，点进去回到知乎原文</li>
+          </ol>
+          <p style={{ margin: "12px 0 0", fontSize: 13, color: "var(--text-faint)" }}>
+            交不出来源的结论会被丢弃，页面会告诉你丢了几条。
+          </p>
+        </div>
+      )}
 
       {steps.length > 0 && !result && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 14, fontSize: 13, color: "var(--text-dim)" }}>

@@ -31,6 +31,8 @@ export async function streamSSE(
   const decoder = new TextDecoder();
   let buf = "";
 
+  let sawDone = false;
+
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -42,7 +44,7 @@ export async function streamSSE(
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
       const payload = line.slice(6).trim();
-      if (payload === "[DONE]") return;
+      if (payload === "[DONE]") { sawDone = true; return; }
       let e: any;
       try {
         e = JSON.parse(payload);
@@ -56,4 +58,8 @@ export async function streamSSE(
       else if (e.type === "error") on.error?.(e.message || "未知错误");
     }
   }
+
+  // 流在没收到 [DONE] 就结束了——通常是连接中断。
+  // 不报的话页面会停在半截进度上，看起来像卡死。
+  if (!sawDone) on.error?.("连接中断，请重试");
 }
