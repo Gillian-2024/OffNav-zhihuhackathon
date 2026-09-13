@@ -23,3 +23,7 @@ COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 CMD ["node", "server.js"]
+
+# 备用路径：CloudBase 云托管（容器型）。当前账号套餐未开通云托管资源，
+# 实际部署走「静态网站托管 → Git 平台部署」的 Next.js 框架路径。
+# 放在 deploy/ 而非根目录，避免平台误判为容器构建。
