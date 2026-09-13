@@ -72,3 +72,15 @@ export async function fetchZhihuUser(accessToken: string): Promise<{
     avatar: String(parsed.avatar_path ?? ""),
   };
 }
+
+// 浏览器绑定校验：state 必须在铸造它的那个浏览器里兑换。
+// 抽成纯函数只为可测——它是防跨浏览器重放的那道守卫，
+// 原先内联在 route handler 里，不起真实请求就测不到。
+// 两侧都缺失时必须返回 false，不能让 undefined === undefined 蒙混过关。
+export function matchesSessionHint(
+  cookieHint: string | undefined | null,
+  storedHint: string | undefined | null
+): boolean {
+  if (!cookieHint || !storedHint) return false;
+  return cookieHint === storedHint;
+}

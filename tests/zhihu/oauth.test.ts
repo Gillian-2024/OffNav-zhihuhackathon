@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { buildAuthorizeUrl, exchangeCodeForToken, fetchZhihuUser, parseUidLossless } from "@/lib/zhihu/oauth";
+import { buildAuthorizeUrl, exchangeCodeForToken, fetchZhihuUser, parseUidLossless , matchesSessionHint } from "@/lib/zhihu/oauth";
 
 beforeEach(() => {
   process.env.ZHIHU_OAUTH_APP_ID = "app-123";
@@ -74,5 +74,34 @@ describe("fetchZhihuUser", () => {
       new Response('{"code":404,"data":"User don\'t exist"}', { status: 200 })
     );
     await expect(fetchZhihuUser("tok")).rejects.toThrow();
+  });
+});
+
+describe("matchesSessionHint（防跨浏览器重放）", () => {
+  it("同一浏览器：值相等 → 通过", () => {
+    expect(matchesSessionHint("sess-abc", "sess-abc")).toBe(true);
+  });
+
+  it("换了浏览器：值不同 → 拒绝", () => {
+    expect(matchesSessionHint("sess-abc", "sess-xyz")).toBe(false);
+  });
+
+  it("cookie 缺失 → 拒绝（不能因为读不到就放行）", () => {
+    expect(matchesSessionHint(undefined, "sess-abc")).toBe(false);
+    expect(matchesSessionHint(null, "sess-abc")).toBe(false);
+  });
+
+  it("cookie 是空串 → 拒绝", () => {
+    expect(matchesSessionHint("", "sess-abc")).toBe(false);
+  });
+
+  it("库里存的 hint 缺失 → 拒绝", () => {
+    expect(matchesSessionHint("sess-abc", undefined)).toBe(false);
+    expect(matchesSessionHint("sess-abc", "")).toBe(false);
+  });
+
+  it("两侧都缺失 → 拒绝（undefined === undefined 不算匹配）", () => {
+    expect(matchesSessionHint(undefined, undefined)).toBe(false);
+    expect(matchesSessionHint("", "")).toBe(false);
   });
 });

@@ -2,7 +2,7 @@
 // 纯服务端跳转，不依赖前端状态。
 import { NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
-import { exchangeCodeForToken, fetchZhihuUser } from "@/lib/zhihu/oauth";
+import { exchangeCodeForToken, fetchZhihuUser, matchesSessionHint } from "@/lib/zhihu/oauth";
 import { getStore } from "@/lib/db/store";
 
 export const runtime = "nodejs";
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   if (!st) return fail("登录请求已失效，请重新登录");
 
   const hint = req.cookies.get("offnav_hint")?.value;
-  if (!hint || hint !== st.sessionHint) return fail("登录请求与当前浏览器不匹配");
+  if (!matchesSessionHint(hint, st.sessionHint)) return fail("登录请求与当前浏览器不匹配");
 
   try {
     const { accessToken } = await exchangeCodeForToken(code);
