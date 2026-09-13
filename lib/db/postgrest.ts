@@ -49,8 +49,16 @@ async function rdb(path: string, init: RequestInit = {}): Promise<any> {
     const body = await res.text();
     throw new Error(`CloudBase RDB ${res.status}: ${body.slice(0, 200)}`);
   }
-  if (res.status === 204) return null;
-  return res.json();
+  // 写操作常见 201/204 且响应体为空（实测 CloudBase 的 POST 返回 201 + 零长度 body）。
+  // 直接 res.json() 会在空 body 上抛 "Unexpected end of JSON input"——
+  // 那个报错来自 undici 内部，堆栈里看不到本文件，极难定位，所以这里按文本读再判空。
+  const text = await res.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`CloudBase RDB ${res.status}: 响应不是合法 JSON: ${text.slice(0, 200)}`);
+  }
 }
 
 // 裸数组是已确认的实际形状（`GET .../zhihu_search_cache?limit=1` 空表时返回
