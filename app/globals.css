@@ -8,7 +8,10 @@
   --border: #ebebeb;
   --text: #121212;
   --text-dim: #646464;
-  --text-faint: #8590a6;
+  /* 压深到 #646f80：原 #8590a6 在 #f6f6f6 上只有 2.97:1，远低于 12–13px 小字
+     要求的 4.5:1。这是仍达标的色阶里最轻的一档（灰底 4.71、白底 5.09），
+     既守住 AA，又保住「比次文字更轻」的层级。深色主题同值达标，不受影响。 */
+  --text-faint: #646f80;
 
   /* 品牌蓝 ADS Blue/MapBrand。#1772f6 配白字是 4.40:1——正文链接不达 AA，
      所以链接用压深一档的 #1568e6（白底 5.05、灰底 4.68），品牌蓝本色留给
@@ -142,12 +145,21 @@ html, body {
   color: var(--text);
   cursor: pointer;
 }
+/* 手机：未展开时收起（用 data 属性而非 hidden 属性，
+   这样 1024px 断点能把它改成常驻栏——hidden 是 HTML 属性，CSS 盖不过去）。 */
+.pool-panel[data-open="0"] { display: none; }
+
 .pool-panel {
   position: fixed;
   inset-inline: 0;
   bottom: 0;
   z-index: 21;
-  max-height: 72vh;
+  /* 抽屉不占满全屏：留出上方一截，让用户知道结果还在后面，也便于点外部收起。
+     再加 -webkit-overflow-scrolling 让 iOS 里滑动跟手。 */
+  max-height: 64vh;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+  -webkit-overflow-scrolling: touch;
   overflow-y: auto;
   background: var(--surface);
   border-top: 1px solid var(--border);
@@ -168,6 +180,10 @@ html, body {
   :root { --maxw: 1180px; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
   .pool-tab { display: none; }
+  /* 宽屏：无论 data-open 是什么都常驻显示 */
+  .pool-panel[data-open="0"],
+  .pool-panel[data-open="1"] { display: block; }
+
   .pool-panel {
     position: sticky;
     top: 20px;
@@ -177,4 +193,85 @@ html, body {
     border-radius: var(--radius);
     padding: 14px;
   }
+}
+
+/* —— 结果页的视觉层级 ——
+   滑动时要能一眼分出「哪里是新的一轮」「哪句是结论」「哪句是来源」。
+   实测截图发现三者字重接近、来源卡的赞同数还会掉到第二行，所以分三处收拾。 */
+
+/* 轮次分节：左侧一个小方块 + 更重的字，滑动时是明确的分界 */
+.round-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 10px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.round-dot {
+  width: 3px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--brand);
+  flex-shrink: 0;
+}
+
+/* 主题：比结论轻，作为卡内的小标题 */
+.topic-head {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+
+/* 结论：正文主角，比来源卡重且深 */
+.point { margin-bottom: 14px; }
+.point:last-child { margin-bottom: 0; }
+.point-text {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+/* 来源卡一行放得下：赞同数不再折到第二行 */
+.ev-head {
+  flex-wrap: nowrap;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ev-title {
+  /* flex-basis 必须是 0：留 auto 时以内容宽为基准，配合 flex-wrap 会把末尾的
+     赞同数挤到第二行（实测子元素合计 335px > 容器 316px）。 */
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ev-meta { flex-shrink: 0; white-space: nowrap; }
+
+/* 抽屉抬高一点，避开开发工具悬浮球，也更好点 */
+.pool-tab { padding-block: 14px; }
+
+/* 刘看山（知乎官方 IP）：只绑三个真实状态，不做纯装饰。
+   打招呼=空状态、电脑=正在检索生成、瞌睡=出错。
+   原图 320x320/20fps 每个近 1MB，抽帧到 10fps + 缩到 160 后约 130-200KB。 */
+.kanshan-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.kanshan {
+  flex-shrink: 0;
+  width: auto;
+  height: 60px;
+  object-fit: contain;
+}
+.kanshan-lg { height: 84px; }
+@media (prefers-reduced-motion: reduce) {
+  /* 尊重系统的减少动态偏好：静态首帧仍然在，只是不再循环播放 */
+  .kanshan { animation: none; }
 }

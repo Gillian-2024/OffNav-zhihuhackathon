@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.env
+.env.*
+.superpowers
+.playwright-mcp
+.code-review-graph
+npm-debug.log*

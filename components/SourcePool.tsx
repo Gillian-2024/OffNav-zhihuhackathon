@@ -33,7 +33,7 @@ export function SourcePool({ items, usedIds }: { items: PoolItem[]; usedIds: Set
         本次检索 {items.length} 篇原文（{usedCount} 篇被引用）›
       </button>
 
-      <aside className="pool-panel" hidden={!open} data-desktop-always>
+      <aside className="pool-panel" data-open={open ? "1" : "0"} data-desktop-always>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <strong style={{ fontSize: 14 }}>
             来源池 · {items.length} 篇

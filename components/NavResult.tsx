@@ -4,18 +4,23 @@ import { EvidenceList } from "./EvidenceCard";
 export function NavResult({ data }: { data: any }) {
   return (
     <div>
-      <p style={{ color: "var(--text-dim)" }}>{data.jobSummary}</p>
+      <div className="card" style={{ marginBottom: 20 }}>
+        <p style={{ margin: 0, color: "var(--text-dim)", fontSize: 14, lineHeight: 1.75 }}>{data.jobSummary}</p>
+      </div>
 
       {data.rounds.map((r: any, ri: number) => (
         <section key={ri} style={{ marginTop: 22 }}>
-          <h2 style={{ fontSize: 17, margin: "0 0 10px" }}>{r.round}</h2>
+          <h2 className="round-head">
+            <span className="round-dot" aria-hidden="true" />
+            {r.round}
+          </h2>
 
           {r.topics.map((t: any, ti: number) => (
             <div className="card" key={ti} style={{ marginBottom: 10 }}>
-              <h3 style={{ fontSize: 14, margin: "0 0 8px", color: "var(--text-dim)" }}>{t.topic}</h3>
+              <h3 className="topic-head">{t.topic}</h3>
               {t.points.map((p: any, pi: number) => (
-                <div key={pi} style={{ marginBottom: 12 }}>
-                  <div>{p.text}</div>
+                <div key={pi} className="point">
+                  <div className="point-text">{p.text}</div>
                   <EvidenceList cards={p.evidence} />
                 </div>
               ))}

@@ -163,9 +163,12 @@ export default function Home() {
 
       {!busy && !result && !error && steps.length === 0 && (
         <div className="card" style={{ marginTop: 18 }}>
-          <p style={{ margin: "0 0 10px", fontSize: 14, color: "var(--text-dim)" }}>
-            输入后，OffNav 会做四件事：
-          </p>
+          <div className="kanshan-row">
+            <img src="/kanshan/hello.gif" alt="" className="kanshan kanshan-lg" />
+            <p style={{ margin: 0, fontSize: 14, color: "var(--text-dim)" }}>
+              输入后，OffNav 会做四件事：
+            </p>
+          </div>
           <ol style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: "var(--text-dim)", lineHeight: 1.9 }}>
             <li>用多组关键词检索知乎，合并去重成一个内容池</li>
             <li>按知乎自己的权威度（<span className="auth auth-4">L4</span> 最高）和赞同数重排</li>
@@ -179,11 +182,16 @@ export default function Home() {
       )}
 
       {steps.length > 0 && !result && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 14, fontSize: 13, color: "var(--text-dim)" }}>
-          {steps.map((s, i) => (
-            <li key={i}>· {s}</li>
-          ))}
-        </ul>
+        <div className="card" style={{ marginTop: 14 }}>
+          <div className="kanshan-row">
+            <img src="/kanshan/working.gif" alt="" className="kanshan" />
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-dim)", lineHeight: 1.9 }}>
+              {steps.map((s, i) => (
+                <li key={i}>{i === steps.length - 1 ? "▸ " : "✓ "}{s}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
 
       {notice && (
@@ -193,8 +201,11 @@ export default function Home() {
       )}
 
       {error && (
-        <div className="card" style={{ marginTop: 14, borderColor: "#c0574a", color: "#c0574a" }}>
-          {error}
+        <div className="card" style={{ marginTop: 14, borderColor: "#f1403c" }}>
+          <div className="kanshan-row">
+            <img src="/kanshan/sleepy.gif" alt="" className="kanshan" />
+            <span style={{ color: "#f1403c", fontSize: 14 }}>{error}</span>
+          </div>
         </div>
       )}
 

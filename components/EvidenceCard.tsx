@@ -27,9 +27,9 @@ export function EvidenceCardView({ card }: { card: EvidenceCard }) {
       <button className="ev-head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span aria-hidden="true">{open ? "▾" : "▸"}</span>
         <span className="ev-title">{cleanTitle(card.title)}</span>
-        <span>@{card.authorName}</span>
+        <span className="ev-meta">@{card.authorName}</span>
         <AuthorityBadge level={card.authorityLevel} />
-        <span>{card.voteUpCount} 赞同</span>
+        <span className="ev-meta">{card.voteUpCount} 赞</span>
       </button>
 
       {open && (
