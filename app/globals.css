@@ -1,0 +1,162 @@
+/* OffNav 设计令牌。手机优先，1024px 为增强断点。
+   权威度是唯一强调色系——L4 最深，L1 最浅。 */
+:root {
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --border: #e6e4e0;
+  --text: #1c1b19;
+  --text-dim: #6b6862;
+  --text-faint: #9a968f;
+
+  /* 权威度阶梯 */
+  --auth-4: #1a4d3a;
+  --auth-3: #2f7a5c;
+  --auth-2: #6aa88c;
+  --auth-1: #b3ccbf;
+  --auth-0: #c9c6c0;
+
+  --radius: 10px;
+  --gutter: 16px;
+  --maxw: 720px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --surface: #1f2124;
+    --border: #33363b;
+    --text: #ececea;
+    --text-dim: #a8a5a0;
+    --text-faint: #77746f;
+
+    --auth-4: #7fd8ae;
+    --auth-3: #5cbb93;
+    --auth-2: #3f8b6c;
+    --auth-1: #2d5f4a;
+    --auth-0: #46484c;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.65 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+  padding-block: 20px 96px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+/* 权威度徽标 */
+.auth {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--auth-0);
+}
+.auth-4 { background: var(--auth-4); }
+.auth-3 { background: var(--auth-3); }
+.auth-2 { background: var(--auth-2); }
+.auth-1 { background: var(--auth-1); color: var(--text); }
+
+/* 证据链卡片 */
+.ev {
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+  margin-top: 8px;
+}
+.ev-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.ev-title { color: var(--text); font-weight: 500; }
+.ev-body {
+  margin-top: 6px;
+  padding: 10px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.ev-link { display: inline-block; margin-top: 8px; color: var(--auth-3); font-size: 13px; }
+
+/* 来源池：手机底部抽屉 */
+.pool-tab {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 12px var(--gutter);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+  color: var(--text);
+  cursor: pointer;
+}
+.pool-panel {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 21;
+  max-height: 72vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px var(--gutter) 24px;
+}
+.pool-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.pool-used { color: var(--auth-3); font-size: 11px; }
+
+/* 宽屏增强：抽屉变右侧常驻栏 */
+@media (min-width: 1024px) {
+  :root { --maxw: 1180px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
+  .pool-tab { display: none; }
+  .pool-panel {
+    position: sticky;
+    top: 20px;
+    inset: auto;
+    max-height: calc(100vh - 40px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+}
