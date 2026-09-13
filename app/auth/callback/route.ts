@@ -16,26 +16,45 @@ const SESSION_TTL_MS = 7 * 24 * 3600 * 1000;
 // Response.redirect 要求绝对 URL（WHATWG fetch 规范，相对路径会直接抛
 // TypeError:Invalid URL）——用请求自身的 origin 拼成绝对地址再跳转。
 export async function GET(req: NextRequest) {
-  const origin = new URL(req.url).origin;
+  // 首页地址不能从 req.url 推断：云函数监听 9000 端口，网关转发时 req.url 带着
+  // `:9000`，据此拼出的跳转地址会被浏览器判为受限端口而拒绝加载；网关同时还把
+  // /offnav 前缀剥掉，origin 里也没有前缀。已登记的 OAuth 回调地址是唯一确定的
+  // 对外地址，从它反推首页，再退回 origin+basePath 兜住本地开发。
+  const home = (() => {
+    const registered = process.env.ZHIHU_OAUTH_REDIRECT_URI;
+    if (registered) {
+      try {
+        const u = new URL(registered);
+        return `${u.origin}${u.pathname.replace(/\/auth\/callback\/?$/, "")}/`;
+      } catch {
+        // 配置写坏时不能让登录整体失败，落到下面的兜底。
+      }
+    }
+    const u = new URL(req.url);
+    return `${u.origin}${process.env.NEXT_PUBLIC_BASE_PATH || ""}/`;
+  })();
 
-  function fail(reason: string) {
-    return Response.redirect(`${origin}/?login_error=${encodeURIComponent(reason)}`, 302);
+  // detail 只带一个短代码，便于排障时从地址栏定位失败环节，不泄露凭证内容。
+  function fail(reason: string, detail?: string) {
+    const q = new URLSearchParams({ login_error: reason });
+    if (detail) q.set("stage", detail);
+    return Response.redirect(`${home}?${q.toString()}`, 302);
   }
 
   const url = new URL(req.url);
   const code = url.searchParams.get("authorization_code") || url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  if (!code) return fail("回调参数不完整");
+  if (!code) return fail("回调参数不完整", "no_code");
 
   const store = getStore();
 
   if (state) {
     // 原子消费：过期、不存在、已用过都返回 null。
     const st = await store.consumeOAuthState(state);
-    if (!st) return fail("登录请求已失效，请重新登录");
+    if (!st) return fail("登录请求已失效，请重新登录", "state_invalid");
 
     const hint = req.cookies.get("offnav_hint")?.value;
-    if (!matchesSessionHint(hint, st.sessionHint)) return fail("登录请求与当前浏览器不匹配");
+    if (!matchesSessionHint(hint, st.sessionHint)) return fail("登录请求与当前浏览器不匹配", "hint_mismatch");
   } else {
     // 已知协议缺口：实测回调可能不返回 state，不能借此拒绝真实登录。
     console.warn("[auth/callback] 回调未带 state，跳过 CSRF 绑定校验（已知协议缺口）");
@@ -55,7 +74,7 @@ export async function GET(req: NextRequest) {
     const sid = randomUUID();
     await store.createSession({ id: sid, userId: user.id, oauthToken: accessToken, expiresAt: Date.now() + SESSION_TTL_MS });
 
-    const res = Response.redirect(`${origin}/?login=ok`, 302);
+    const res = Response.redirect(`${home}?login=ok`, 302);
     const out = new Response(res.body, res);
     // OAuth token 只留服务端；浏览器只拿随机会话标识。
     out.headers.append(
@@ -65,6 +84,6 @@ export async function GET(req: NextRequest) {
     return out;
   } catch (e) {
     console.error("[auth/callback]", (e as Error).message);
-    return fail("授权失败，请重试");
+    return fail("授权失败，请重试", "exchange_failed");
   }
 }
