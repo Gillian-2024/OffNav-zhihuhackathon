@@ -1,0 +1,4 @@
+#!/bin/bash
+export PORT=9000
+export HOSTNAME=0.0.0.0
+exec /var/lang/node18/bin/node --require ./deploy/node18-polyfill.cjs server.js
