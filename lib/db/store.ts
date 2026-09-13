@@ -14,4 +14,9 @@ export function getStore(): OffNavStore {
   return cached;
 }
 
+// 仅供测试：清掉单例选择，让下一次 getStore() 重新按当前环境变量判断。
+export function resetStoreForTests(): void {
+  cached = null;
+}
+
 export type { OffNavStore } from "./types";

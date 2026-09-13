@@ -9,8 +9,11 @@
 //   证明 host/前缀/auth 都对；404 极可能是表尚未建（schema.sql 尚未在控制台执行），
 //   但也不能排除路径形状本身有出入——建表前无法区分这两种可能。
 // - 未确认（待建表后用真实请求验证）：单行过滤语法（`?col=eq.value` 是否原样支持）、
-//   upsert 写法（`Prefer: resolution=merge-duplicates` 是否生效）、返回体形状
-//   （裸数组 vs `{ data: [...] }` 包裹）、表名是否需要 schema 前缀。
+//   upsert 写法（`Prefer: resolution=merge-duplicates` 是否生效，以及能否与
+//   `return=representation` 逗号组合成一个 Prefer 头一起生效）、返回体形状
+//   （裸数组 vs `{ data: [...] }` 包裹）、表名是否需要 schema 前缀、PATCH 命中零行
+//   时网关返回的是 200+空数组（PostgREST 标准行为）还是 404（见 consumeOAuthState
+//   内注释与兜底处理）。
 // - 本文件按 PostgREST 标准惯例实现，未对 CloudBase 网关做任何真实调用验证
 //   （避免在表不存在时用无意义的 404 消耗查证机会）。`pickRow` 保留对两种返回体
 //   形状的兼容，等真实验证后再收窄为其中一种。
@@ -74,9 +77,12 @@ export function createPostgrestStore(): OffNavStore {
     async upsertUser(u: UserInput): Promise<UserRow> {
       const id = `u_${u.zhihuUid}`;
       const createdAt = Date.now();
-      await rdb("users", {
+      // merge-duplicates + return=representation：PostgREST 惯例可用逗号组合两个
+      // Prefer 指令一次声明；组合写法本身未对 CloudBase 网关验证过。目的是让更新
+      // 时也能拿到服务端存的真实行（尤其 created_at），而不是用本地 Date.now() 冒充。
+      const body = await rdb("users", {
         method: "POST",
-        headers: { Prefer: "resolution=merge-duplicates" },
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
         body: JSON.stringify({
           id,
           zhihu_uid: u.zhihuUid,
@@ -86,6 +92,14 @@ export function createPostgrestStore(): OffNavStore {
           created_at: createdAt,
         }),
       });
+      const r = pickRow(body);
+      if (r) {
+        return {
+          id: r.id, zhihuUid: r.zhihu_uid, hashId: r.hash_id,
+          fullname: r.fullname, avatar: r.avatar, createdAt: Number(r.created_at),
+        };
+      }
+      // 响应没带回行（未确认网关是否支持 return=representation）时，退回本地拼装值。
       return { id, createdAt, ...u };
     },
 
@@ -111,15 +125,28 @@ export function createPostgrestStore(): OffNavStore {
       });
     },
     // 原子消费：条件更新 consumed_at is null，靠返回行判断是否抢到。
+    // 风险未查证：PATCH 匹配零行（state 已被消费/不存在）时，CloudBase 网关
+    // 到底是像标准 PostgREST 一样返回 200 + 空数组，还是返回 404。若是 404，
+    // rdb() 会 throw，下面必须兜底为 null（防重放场景应失败关闭，不应让登录流程崩）；
+    // 一旦建表可验证，若确认是 200+空数组，这段 catch 可以简化但不需要删除
+    // （多一层防御无害）。真正的 5xx/鉴权失败必须继续往外抛，不能被这里吞掉。
     async consumeOAuthState(state) {
-      const body = await rdb(
-        `oauth_states?state=eq.${encodeURIComponent(state)}&consumed_at=is.null`,
-        {
-          method: "PATCH",
-          headers: { Prefer: "return=representation" },
-          body: JSON.stringify({ consumed_at: Date.now() }),
-        }
-      );
+      let body: any;
+      try {
+        body = await rdb(
+          `oauth_states?state=eq.${encodeURIComponent(state)}&consumed_at=is.null`,
+          {
+            method: "PATCH",
+            headers: { Prefer: "return=representation" },
+            body: JSON.stringify({ consumed_at: Date.now() }),
+          }
+        );
+      } catch (err: any) {
+        const msg = String(err?.message ?? "");
+        // rdb() 的错误信息形如 "CloudBase RDB 404: ...”——只吞未命中类状态码。
+        if (/CloudBase RDB 404:/.test(msg)) return null;
+        throw err;
+      }
       const r = pickRow(body);
       if (!r || Number(r.expires_at) <= Date.now()) return null;
       return { state: r.state, sessionHint: r.session_hint, expiresAt: Number(r.expires_at) };

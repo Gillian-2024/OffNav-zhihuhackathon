@@ -9,6 +9,8 @@ import type { OffNavStore } from "../db/types";
 const DEFAULT_TTL_MS = 24 * 3600000;
 
 // 顺序无关：同一组关键词无论顺序都命中同一缓存。
+// 已知可接受的权衡：排序后用空格拼接，["a b","c"] 和 ["a","b c"] 会碰撞成同一 hash
+// （都拼成 "a b c"）。求职关键词场景短且罕见此类边界，接受不修。
 export function hashQueries(queries: string[]): string {
   const norm = [...queries].map((q) => q.trim()).sort().join(" ");
   return createHash("sha256").update(norm).digest("hex").slice(0, 32);
