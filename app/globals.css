@@ -9,11 +9,15 @@
   --text-faint: #9a968f;
 
   /* 权威度阶梯 */
-  --auth-4: #1a4d3a;
-  --auth-3: #2f7a5c;
-  --auth-2: #6aa88c;
-  --auth-1: #b3ccbf;
-  --auth-0: #c9c6c0;
+  /* 权威度阶梯：L4 最深 → L1 最浅，四级明度单调递进（相邻 >=1.66x）。
+     全部按「白字」校准过 WCAG AA：最低一级 L1 也有 4.85:1。
+     11px 小字上原配色最低只有 1.70:1，L4 徽标几乎不可读——而 L4 恰是产品最想让人看到的信号。 */
+  --auth-4: #0c2e21;
+  --auth-3: #154a34;
+  --auth-2: #1f6547;
+  --auth-1: #28805c;
+  --auth-0: #6b7280;
+  --auth-fg: #ffffff;
 
   --radius: 10px;
   --gutter: 16px;
@@ -29,11 +33,13 @@
     --text-dim: #a8a5a0;
     --text-faint: #77746f;
 
-    --auth-4: #7fd8ae;
-    --auth-3: #5cbb93;
-    --auth-2: #3f8b6c;
-    --auth-1: #2d5f4a;
-    --auth-0: #46484c;
+    /* 深色主题反转：背景转亮、文字转深，同样四级单调 + 全部 >=4.53:1。 */
+    --auth-4: #8ee4b8;
+    --auth-3: #6bcb9b;
+    --auth-2: #4fb183;
+    --auth-1: #3d9670;
+    --auth-0: #9aa0a6;
+    --auth-fg: #10231b;
   }
 }
 
@@ -70,13 +76,13 @@ html, body {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #fff;
+  color: var(--auth-fg);
   background: var(--auth-0);
 }
 .auth-4 { background: var(--auth-4); }
 .auth-3 { background: var(--auth-3); }
 .auth-2 { background: var(--auth-2); }
-.auth-1 { background: var(--auth-1); color: var(--text); }
+.auth-1 { background: var(--auth-1); }
 
 /* 证据链卡片 */
 .ev {
